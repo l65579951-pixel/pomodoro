@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --bg-color: #fce4ec; /* Color por defecto */
+            --text-color: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.2);
+            --accent: #ff80ab;
+        }
+
+        /* Adaptación a modo oscuro de Notion */
+        @media (prefers-color-scheme: dark) {
+            :root { --glass-bg: rgba(0, 0, 0, 0.3); }
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            transition: background 0.3s;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            border-radius: 30px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: var(--text-color);
+            width: 300px;
+        }
+
+        #timer { font-size: 4rem; font-weight: bold; margin: 20px 0; }
+        
+        button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="card" id="app">
+    <div id="timer">25:00</div>
+    <button onclick="toggleTimer()">START</button>
+    
+    <div class="controls">
+        <input type="file" id="bgInput" style="display:none" onchange="changeBg(event)">
+        <button onclick="document.getElementById('bgInput').click()">🖼</button>
+        <input type="color" id="colorPicker" onchange="changeColor(this.value)">
+    </div>
+</div>
+
+<script>
+    let timeLeft = 1500;
+    let timerId = null;
+
+    function toggleTimer() {
+        if(timerId) { clearInterval(timerId); timerId = null; }
+        else {
+            timerId = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = formatTime(timeLeft);
+            }, 1000);
+        }
+    }
+
+    function formatTime(s) {
+        const m = Math.floor(s/60);
+        const sec = s % 60;
+        return `${m}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function changeBg(e) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            document.body.style.backgroundImage = `url(${event.target.result})`;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+
+    function changeColor(color) {
+        document.documentElement.style.setProperty('--text-color', color);
+    }
+</script>
+</body>
+</html>
