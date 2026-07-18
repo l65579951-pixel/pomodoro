@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Y2K Glassmorphism Pomodoro</title>
     <style>
-        /* Variables base y temas automáticos (Notion Light/Dark) */
+        /* Variables base y temas automáticos */
         :root {
             --text-color: #ffffff;
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --glass-blur: 15px;
-            --primary-font: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            --app-bg: #e6a8b6; /* Fondo del body si no hay imagen */
+            --glass-bg: rgba(255, 255, 255, 0.2);
+            --glass-blur: 16px;
+            /* Tipografía más limpia y profesional */
+            --primary-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --app-bg: #e6a8b6; 
         }
 
         @media (prefers-color-scheme: dark) {
@@ -41,23 +42,22 @@
             padding: 10px;
         }
 
-        /* CONTENEDOR EXTERIOR: 340x340px */
+        /* CONTENEDOR EXTERIOR: Diseño más elegante y proporcionado */
         .widget-outer-container {
             position: relative;
             width: 340px;
-            height: 340px;
-            border-radius: 35px;
+            height: 360px;
+            border-radius: 28px;
             overflow: hidden; 
-            padding: 40px;
+            padding: 24px;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.05);
             flex-shrink: 0;
         }
 
-        /* La imagen de fondo pura y nítida */
         #dynamic-bg {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -67,7 +67,7 @@
             transition: opacity 0.5s ease;
         }
 
-        /* PANEL INTERIOR (EL LÍMITE DE CRISTAL) */
+        /* PANEL INTERIOR: Cristal refinado */
         .glass-inner-panel {
             position: relative;
             z-index: 2;
@@ -76,26 +76,25 @@
             background: var(--glass-bg);
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 30px;
-            padding: 1.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 1.8rem 1.2rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 1.2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            justify-content: space-between;
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         /* Modos (Pomodoro, Breaks) */
         .modes {
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 25px;
-            padding: 5px;
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 4px;
             display: flex;
-            gap: 4px;
+            gap: 2px;
             width: 100%;
-            max-width: 280px;
         }
 
         .mode-btn {
@@ -103,26 +102,35 @@
             background: transparent;
             border: none;
             color: var(--text-color);
-            padding: 6px 4px;
-            border-radius: 20px;
-            font-weight: bold;
+            padding: 8px 4px;
+            border-radius: 26px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.65rem;
+            transition: all 0.3s ease;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .mode-btn:hover {
+            opacity: 1;
         }
 
         .mode-btn.active {
             background: var(--text-color);
             color: #d18d9f; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            opacity: 1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-weight: 600;
         }
 
         /* Display del reloj */
         .timer-display {
-            font-size: 3.2rem;
-            font-weight: bold;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-            letter-spacing: 1px;
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            letter-spacing: 2px;
+            font-variant-numeric: tabular-nums; /* Evita que los números salten */
+            margin: 10px 0;
         }
 
         /* Botón Start/Pause */
@@ -130,56 +138,72 @@
             background: var(--text-color);
             color: #d18d9f;
             border: none;
-            border-radius: 25px;
-            padding: 8px 30px;
+            border-radius: 30px;
+            padding: 12px 36px;
             font-size: 0.9rem;
-            font-weight: bold;
+            font-weight: 700;
+            letter-spacing: 1px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            transition: transform 0.1s, background 0.3s;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+            text-transform: uppercase;
         }
 
-        .start-btn:active { transform: scale(0.95); }
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .start-btn:active { 
+            transform: translateY(1px); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
 
         /* Controles de utilidades */
         .controls {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
+            gap: 12px;
             width: 100%;
-            max-width: 280px;
         }
 
         .icon-btn {
-            background: rgba(255, 255, 255, 0.4);
-            border: none;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 0.95rem;
             cursor: pointer;
-            color: var(--text-color);
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
+        .icon-btn img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            /* Filtro opcional para adaptar las imágenes al color del texto si lo deseas, 
+               por ahora mantienen su color original */
+        }
+
         .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.6);
         }
 
         /* Barra de progreso */
         .progress-container {
             width: 100%;
-            max-width: 280px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.3);
+            height: 4px;
+            background: rgba(0, 0, 0, 0.15);
             border-radius: 10px;
             overflow: hidden;
+            margin-top: 5px;
         }
 
         .progress-bar {
@@ -187,20 +211,24 @@
             width: 0%;
             background: var(--text-color);
             transition: width 1s linear;
+            border-radius: 10px;
         }
 
         .cycle-counter {
             font-size: 0.75rem;
-            font-weight: bold;
-            opacity: 0.9;
-            text-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+            font-weight: 500;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
         }
 
         /* Modal de Configuración */
         .modal {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -218,59 +246,84 @@
             background: var(--glass-bg);
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 1.5rem;
-            max-width: 300px;
-            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2rem;
+            width: 90%;
+            max-width: 320px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            color: var(--text-color);
         }
 
-        .modal-content h2 { margin-bottom: 1rem; text-align: center; font-size: 1.2rem; }
+        .modal-content h2 { 
+            margin-bottom: 1.5rem; 
+            text-align: center; 
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
 
         .setting-group {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.8rem;
+            margin-bottom: 1rem;
             width: 100%;
             font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .setting-group input[type="number"] {
-            width: 60px;
-            padding: 6px;
-            border: none;
-            border-radius: 6px;
+            width: 65px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: inherit;
+            outline: none;
+        }
+
+        .setting-group input[type="number"]:focus {
+            border-color: rgba(255, 255, 255, 0.8);
         }
 
         .setting-group input[type="range"] {
-            width: 100px;
+            width: 120px;
+            accent-color: var(--text-color);
         }
 
         .save-btn {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             background: var(--text-color);
             color: #d18d9f;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
 
-    <!-- CONTENEDOR EXTERIOR (Fondo): Aquí va la imagen nítida -->
+    <!-- CONTENEDOR EXTERIOR -->
     <div class="widget-outer-container">
         
         <div id="dynamic-bg"></div>
         
-        <!-- CONTENEDOR INTERIOR (Límite): Este es el cristal desenfocado -->
+        <!-- CONTENEDOR INTERIOR -->
         <main class="glass-inner-panel" id="main-panel">
             
             <!-- Selector de modos -->
@@ -286,15 +339,25 @@
             <!-- Botón de acción principal -->
             <button id="btn-main" class="start-btn">START</button>
 
-            <!-- Controles inferiores con los íconos exactos -->
+            <!-- Controles inferiores con imágenes personalizadas -->
             <div class="controls">
-                <button id="btn-reset" class="icon-btn" title="Reiniciar">🔄</button>
-                <button id="btn-settings" class="icon-btn" title="Configuración">⚙</button>
+                <button id="btn-reset" class="icon-btn" title="Reiniciar">
+                    <img src="https://i.postimg.cc/fyskRxTb/Two-Directions-Red-Recycle-Vector-Icon-Transparent-Png-Clipart-Red-Recycle-Arrows-PNG-and-Vector.png" alt="Reiniciar">
+                </button>
+                <button id="btn-settings" class="icon-btn" title="Configuración">
+                    <img src="https://i.postimg.cc/Bb2DhSth/Settings-app-icon-removebg-preview.png" alt="Ajustes">
+                </button>
                 
                 <!-- Disparadores visuales -->
-                <button id="btn-upload-trigger" class="icon-btn" title="Elegir fondo">🖼</button>
-                <button id="btn-remove-bg" class="icon-btn" title="Reiniciar imagen">🗑</button>
-                <button id="btn-color-trigger" class="icon-btn" title="Color de texto">🎨</button>
+                <button id="btn-upload-trigger" class="icon-btn" title="Elegir fondo">
+                    <img src="https://i.postimg.cc/NjcbvVch/Album-removebg-preview.png" alt="Cambiar fondo">
+                </button>
+                <button id="btn-remove-bg" class="icon-btn" title="Reiniciar imagen">
+                    <img src="https://i.postimg.cc/T31112Gb/810929476716156264-removebg-preview.png" alt="Reiniciar imagen">
+                </button>
+                <button id="btn-color-trigger" class="icon-btn" title="Color de texto">
+                    <img src="https://i.postimg.cc/gJHm41mq/diao-se-pan-removebg-preview.png" alt="Color de texto">
+                </button>
                 
                 <!-- Inputs ocultos -->
                 <input type="file" id="bg-upload" accept="image/*" style="display: none;">
@@ -331,12 +394,12 @@
             </div>
             
             <div class="setting-group">
-                <label>Opacidad del cristal:</label>
-                <input type="range" id="set-opacity" min="0" max="1" step="0.05" value="0.25">
+                <label>Opacidad cristal:</label>
+                <input type="range" id="set-opacity" min="0" max="1" step="0.05" value="0.2">
             </div>
             <div class="setting-group">
-                <label>Desenfoque (Blur):</label>
-                <input type="range" id="set-blur" min="0" max="30" step="1" value="15">
+                <label>Desenfoque:</label>
+                <input type="range" id="set-blur" min="0" max="30" step="1" value="16">
             </div>
 
             <button id="btn-save-settings" class="save-btn">Guardar</button>
@@ -360,8 +423,8 @@
             pomodoro: 25,
             short: 5,
             long: 15,
-            opacity: 0.25,
-            blur: 15,
+            opacity: 0.2,
+            blur: 16,
             textColor: '#ffffff',
             bgImage: null
         };
@@ -537,8 +600,8 @@
             settings.pomodoro = parseInt(inputPomo.value) || 25;
             settings.short = parseInt(inputShort.value) || 5;
             settings.long = parseInt(inputLong.value) || 15;
-            settings.opacity = parseFloat(inputOpacity.value) || 0.25;
-            settings.blur = parseInt(inputBlur.value) || 15;
+            settings.opacity = parseFloat(inputOpacity.value) || 0.2;
+            settings.blur = parseInt(inputBlur.value) || 16;
             
             saveSettings();
             applySettings();
