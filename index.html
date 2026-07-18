@@ -3,588 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Y2K Glassmorphism Pomodoro</title>
+    <title>Pomodoro</title>
     <style>
-        /* Variables base y temas automáticos (Notion Light/Dark) */
-        :root {
-            --text-color: #ffffff;
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --glass-blur: 15px;
-            --primary-font: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-            --app-bg: #e6a8b6; /* Fondo del body si no hay imagen */
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root { --app-bg: #2f3437; }
-        }
-
-        @media (prefers-color-scheme: light) {
-            :root { --app-bg: #ffffff; }
-        }
-
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: var(--primary-font);
-            background-color: var(--app-bg);
-            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: auto;
-            transition: background-color 0.5s ease;
             padding: 20px;
         }
 
-        /* 
-          CONTENEDOR EXTERIOR (EL FONDO): 
-          Cuadrado aproximadamente 1000x1000px
-        */
-        .widget-outer-container {
-            position: relative;
-            width: 90vw;
-            max-width: 1000px;
-            aspect-ratio: 1 / 1;
-            border-radius: 50px;
-            overflow: hidden; 
-            padding: 80px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-            background: rgba(255, 255, 255, 0.1);
-            flex-shrink: 0;
-        }
-
-        /* La imagen de fondo pura y nítida */
-        #dynamic-bg {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-size: cover;
-            background-position: center;
-            z-index: 1;
-            transition: opacity 0.5s ease;
-        }
-
-        /* 
-          PANEL INTERIOR (EL LÍMITE DE CRISTAL)
-        */
-        .glass-inner-panel {
-            position: relative;
-            z-index: 2;
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
             width: 100%;
-            height: 100%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 40px;
-            padding: 3rem 2.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2.5rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
         }
 
-        /* Modos (Pomodoro, Breaks) */
+        h1 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+        }
+
+        .timer {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 5px;
+        }
+
         .modes {
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 30px;
-            padding: 8px;
             display: flex;
-            gap: 6px;
-            width: 100%;
-            max-width: 350px;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
         }
 
         .mode-btn {
             flex: 1;
-            background: transparent;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .mode-btn:hover {
+            border-color: #667eea;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
             border: none;
-            color: var(--text-color);
-            padding: 12px 8px;
-            border-radius: 25px;
+            border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 1rem;
         }
 
-        .mode-btn.active {
-            background: var(--text-color);
-            color: #d18d9f; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        .btn-start {
+            background: #667eea;
+            color: white;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            flex: 1;
+            min-width: 120px;
         }
 
-        /* Display del reloj */
-        .timer-display {
-            font-size: 6rem;
-            font-weight: bold;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-            letter-spacing: 2px;
+        .btn-start:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
         }
 
-        /* Botón Start/Pause */
-        .start-btn {
-            background: var(--text-color);
-            color: #d18d9f;
-            border: none;
-            border-radius: 35px;
-            padding: 18px 60px;
-            font-size: 1.6rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            transition: transform 0.1s, background 0.3s;
+        .btn-start:active {
+            transform: translateY(0);
         }
 
-        .start-btn:active { transform: scale(0.95); }
+        .btn-small {
+            background: #f0f0f0;
+            color: #333;
+            padding: 10px 20px;
+        }
 
-        /* Controles de utilidades */
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
+        .btn-small:hover {
+            background: #e0e0e0;
+        }
+
+        .progress {
             width: 100%;
-            max-width: 400px;
-        }
-
-        .icon-btn {
-            background: rgba(255, 255, 255, 0.4);
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-color);
-            transition: all 0.2s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.7);
-            transform: translateY(-3px);
-        }
-
-        /* Barra de progreso */
-        .progress-container {
-            width: 100%;
-            max-width: 350px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.3);
+            height: 8px;
+            background: #eee;
             border-radius: 10px;
             overflow: hidden;
+            margin: 20px 0;
         }
 
         .progress-bar {
             height: 100%;
+            background: #667eea;
             width: 0%;
-            background: var(--text-color);
-            transition: width 1s linear;
+            transition: width 0.5s linear;
         }
 
-        .cycle-counter {
-            font-size: 1.2rem;
-            font-weight: bold;
-            opacity: 0.9;
-            text-shadow: 1px 1px 5px rgba(0,0,0,0.1);
-        }
-
-        /* Modal de Configuración */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            opacity: 1;
-            transition: opacity 0.3s;
-        }
-
-        .modal.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .modal-content {
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 2rem;
-            max-width: 400px;
-            border-radius: 35px;
-        }
-
-        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem; }
-
-        .setting-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.2rem;
-            width: 100%;
-            font-size: 1.1rem;
-        }
-
-        .setting-group input[type="number"] {
-            width: 70px;
-            padding: 8px;
-            border: none;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .setting-group input[type="range"] {
-            width: 140px;
-        }
-
-        .save-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 20px;
-            background: var(--text-color);
-            color: #d18d9f;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 1.5rem;
-            font-size: 1.1rem;
+        .cycle {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🍅 Pomodoro</h1>
 
-    <!-- CONTENEDOR EXTERIOR (Fondo): Aquí va la imagen nítida -->
-    <div class="widget-outer-container">
-        
-        <div id="dynamic-bg"></div>
-        
-        <!-- CONTENEDOR INTERIOR (Límite): Este es el cristal desenfocado -->
-        <main class="glass-inner-panel" id="main-panel">
-            
-            <!-- Selector de modos -->
-            <nav class="modes">
-                <button id="btn-pomodoro" class="mode-btn active">Pomodoro</button>
-                <button id="btn-short" class="mode-btn">Short Break</button>
-                <button id="btn-long" class="mode-btn">Long Break</button>
-            </nav>
-
-            <!-- Temporizador -->
-            <div class="timer-display" id="time-display">25:00</div>
-
-            <!-- Botón de acción principal -->
-            <button id="btn-main" class="start-btn">START</button>
-
-            <!-- Controles inferiores con los íconos exactos -->
-            <div class="controls">
-                <button id="btn-reset" class="icon-btn" title="Reiniciar">🔄</button>
-                <button id="btn-settings" class="icon-btn" title="Configuración">⚙</button>
-                
-                <!-- Disparadores visuales -->
-                <button id="btn-upload-trigger" class="icon-btn" title="Elegir fondo">🖼</button>
-                <button id="btn-remove-bg" class="icon-btn" title="Reiniciar imagen">🗑</button>
-                <button id="btn-color-trigger" class="icon-btn" title="Color de texto">🎨</button>
-                
-                <!-- Inputs ocultos -->
-                <input type="file" id="bg-upload" accept="image/*" style="display: none;">
-                <input type="color" id="color-picker" value="#ffffff" style="display: none;">
-            </div>
-
-            <!-- Barra de progreso -->
-            <div class="progress-container">
-                <div class="progress-bar" id="progress"></div>
-            </div>
-            
-            <!-- Contador de ciclos -->
-            <div class="cycle-counter">Ciclo: <span id="cycle-count">1</span></div>
-            
-        </main>
-    </div>
-
-    <!-- Modal de Configuración -->
-    <div id="settings-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2>Configuración</h2>
-            
-            <div class="setting-group">
-                <label>Pomodoro (min):</label>
-                <input type="number" id="set-pomodoro" value="25" min="1">
-            </div>
-            <div class="setting-group">
-                <label>Descanso Corto (min):</label>
-                <input type="number" id="set-short" value="5" min="1">
-            </div>
-            <div class="setting-group">
-                <label>Descanso Largo (min):</label>
-                <input type="number" id="set-long" value="15" min="1">
-            </div>
-            
-            <div class="setting-group">
-                <label>Opacidad del cristal:</label>
-                <input type="range" id="set-opacity" min="0" max="1" step="0.05" value="0.25">
-            </div>
-            <div class="setting-group">
-                <label>Desenfoque (Blur):</label>
-                <input type="range" id="set-blur" min="0" max="30" step="1" value="15">
-            </div>
-
-            <button id="btn-save-settings" class="save-btn">Guardar</button>
+        <div class="modes">
+            <button class="mode-btn active" data-mode="pomodoro">Trabajo (25m)</button>
+            <button class="mode-btn" data-mode="short">Descanso (5m)</button>
+            <button class="mode-btn" data-mode="long">Largo (15m)</button>
         </div>
+
+        <div class="timer" id="timer">25:00</div>
+
+        <div class="progress">
+            <div class="progress-bar" id="bar"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-start" id="play">START</button>
+            <button class="btn btn-small" id="reset">RESET</button>
+        </div>
+
+        <div class="cycle">Ciclo: <span id="cycle">1</span></div>
     </div>
 
-    <!-- Sonido de alarma -->
-    <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script>
-        // --- Variables de Estado ---
-        let timer;
-        let isRunning = false;
-        let timeLeft = 25 * 60;
-        let totalTime = 25 * 60;
-        let currentMode = 'pomodoro';
-        let cycleCount = 1;
+        const timerEl = document.getElementById('timer');
+        const barEl = document.getElementById('bar');
+        const playBtn = document.getElementById('play');
+        const resetBtn = document.getElementById('reset');
+        const cycleEl = document.getElementById('cycle');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const sound = document.getElementById('sound');
 
-        // --- Configuración por defecto ---
-        let settings = {
-            pomodoro: 25,
-            short: 5,
-            long: 15,
-            opacity: 0.25,
-            blur: 15,
-            textColor: '#ffffff',
-            bgImage: null
+        let timer = null;
+        let isRunning = false;
+        let timeLeft = 1500; // 25 minutos
+        let totalTime = 1500;
+        let currentMode = 'pomodoro';
+        let cycles = 1;
+
+        const times = {
+            pomodoro: 25 * 60,
+            short: 5 * 60,
+            long: 15 * 60
         };
 
-        // --- Elementos del DOM ---
-        const timeDisplay = document.getElementById('time-display');
-        const btnMain = document.getElementById('btn-main');
-        const progress = document.getElementById('progress');
-        const cycleCountEl = document.getElementById('cycle-count');
-        const alarmSound = document.getElementById('alarm-sound');
-        const root = document.documentElement;
-
-        // Modos
-        const btnPomodoro = document.getElementById('btn-pomodoro');
-        const btnShort = document.getElementById('btn-short');
-        const btnLong = document.getElementById('btn-long');
-
-        // Controles y disparadores
-        const btnReset = document.getElementById('btn-reset');
-        const btnSettings = document.getElementById('btn-settings');
-        const btnUploadTrigger = document.getElementById('btn-upload-trigger');
-        const btnColorTrigger = document.getElementById('btn-color-trigger');
-        const btnRemoveBg = document.getElementById('btn-remove-bg');
-
-        // Inputs ocultos y fondo
-        const bgUpload = document.getElementById('bg-upload');
-        const colorPicker = document.getElementById('color-picker');
-        const dynamicBg = document.getElementById('dynamic-bg');
-
-        // Modal
-        const modal = document.getElementById('settings-modal');
-        const btnSaveSettings = document.getElementById('btn-save-settings');
-        const inputPomo = document.getElementById('set-pomodoro');
-        const inputShort = document.getElementById('set-short');
-        const inputLong = document.getElementById('set-long');
-        const inputOpacity = document.getElementById('set-opacity');
-        const inputBlur = document.getElementById('set-blur');
-
-        // --- Inicialización ---
-        function init() {
-            loadSettings();
-            applySettings();
-            switchMode('pomodoro');
-        }
-
-        // --- Funciones del Temporizador ---
         function updateDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            const progressPercent = ((totalTime - timeLeft) / totalTime) * 100;
-            progress.style.width = `${progressPercent}%`;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            barEl.style.width = `${((totalTime - timeLeft) / totalTime) * 100}%`;
         }
 
-        function toggleTimer() {
+        function play() {
             if (isRunning) {
                 clearInterval(timer);
-                btnMain.textContent = 'START';
+                playBtn.textContent = 'REANUDAR';
             } else {
                 timer = setInterval(() => {
                     timeLeft--;
                     updateDisplay();
-                    
+
                     if (timeLeft <= 0) {
                         clearInterval(timer);
-                        alarmSound.play();
-                        handleTimerEnd();
+                        sound.play().catch(() => {});
+                        switchMode(currentMode === 'pomodoro' 
+                            ? (cycles % 4 === 0 ? 'long' : 'short') 
+                            : 'pomodoro');
+                        if (currentMode === 'pomodoro') {
+                            cycles++;
+                            cycleEl.textContent = cycles;
+                        }
                     }
                 }, 1000);
-                btnMain.textContent = 'PAUSE';
+                playBtn.textContent = 'PAUSA';
             }
             isRunning = !isRunning;
         }
 
-        function handleTimerEnd() {
-            isRunning = false;
-            btnMain.textContent = 'START';
-            
-            if (currentMode === 'pomodoro') {
-                cycleCount++;
-                cycleCountEl.textContent = cycleCount;
-                if (cycleCount % 4 === 0) {
-                    switchMode('long');
-                } else {
-                    switchMode('short');
-                }
-            } else {
-                switchMode('pomodoro');
-            }
-        }
-
-        function resetTimer() {
+        function reset() {
             clearInterval(timer);
             isRunning = false;
-            btnMain.textContent = 'START';
-            timeLeft = settings[currentMode] * 60;
+            timeLeft = times[currentMode];
             totalTime = timeLeft;
+            playBtn.textContent = 'START';
             updateDisplay();
         }
 
         function switchMode(mode) {
             currentMode = mode;
-            btnPomodoro.classList.remove('active');
-            btnShort.classList.remove('active');
-            btnLong.classList.remove('active');
-            
-            if (mode === 'pomodoro') btnPomodoro.classList.add('active');
-            if (mode === 'short') btnShort.classList.add('active');
-            if (mode === 'long') btnLong.classList.add('active');
-
-            const activeBtn = document.querySelector('.mode-btn.active');
-            if (activeBtn) {
-                activeBtn.style.color = '#000'; 
-            }
-            
-            document.querySelectorAll('.mode-btn:not(.active)').forEach(btn => {
-                btn.style.color = 'var(--text-color)';
-            });
-
-            resetTimer();
+            modeBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+            reset();
         }
 
-        // --- Event Listeners principales ---
-        btnMain.addEventListener('click', toggleTimer);
-        btnReset.addEventListener('click', resetTimer);
-        btnPomodoro.addEventListener('click', () => switchMode('pomodoro'));
-        btnShort.addEventListener('click', () => switchMode('short'));
-        btnLong.addEventListener('click', () => switchMode('long'));
-
-        // Conectar botones
-        btnUploadTrigger.addEventListener('click', () => bgUpload.click());
-        btnColorTrigger.addEventListener('click', () => colorPicker.click());
-
-        // --- Funciones de Configuración y LocalStorage ---
-        function loadSettings() {
-            const saved = localStorage.getItem('y2k-pomodoro-settings');
-            if (saved) {
-                settings = { ...settings, ...JSON.parse(saved) };
-            }
-        }
-
-        function saveSettings() {
-            localStorage.setItem('y2k-pomodoro-settings', JSON.stringify(settings));
-        }
-
-        function applySettings() {
-            root.style.setProperty('--text-color', settings.textColor);
-            root.style.setProperty('--glass-bg', `rgba(255, 255, 255, ${settings.opacity})`);
-            root.style.setProperty('--glass-blur', `${settings.blur}px`);
-            
-            inputPomo.value = settings.pomodoro;
-            inputShort.value = settings.short;
-            inputLong.value = settings.long;
-            inputOpacity.value = settings.opacity;
-            inputBlur.value = settings.blur;
-            colorPicker.value = settings.textColor;
-
-            if (settings.bgImage) {
-                dynamicBg.style.backgroundImage = `url(${settings.bgImage})`;
-            } else {
-                dynamicBg.style.backgroundImage = 'none';
-            }
-
-            resetTimer();
-        }
-
-        btnSettings.addEventListener('click', () => { 
-            modal.classList.remove('hidden'); 
+        modeBtns.forEach(btn => {
+            btn.addEventListener('click', () => switchMode(btn.dataset.mode));
         });
 
-        btnSaveSettings.addEventListener('click', () => {
-            settings.pomodoro = parseInt(inputPomo.value) || 25;
-            settings.short = parseInt(inputShort.value) || 5;
-            settings.long = parseInt(inputLong.value) || 15;
-            settings.opacity = parseFloat(inputOpacity.value) || 0.25;
-            settings.blur = parseInt(inputBlur.value) || 15;
-            
-            saveSettings();
-            applySettings();
-            modal.classList.add('hidden');
-        });
+        playBtn.addEventListener('click', play);
+        resetBtn.addEventListener('click', reset);
 
-        colorPicker.addEventListener('input', (e) => {
-            settings.textColor = e.target.value;
-            saveSettings();
-            applySettings();
-        });
-
-        bgUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    settings.bgImage = event.target.result;
-                    saveSettings();
-                    applySettings();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        btnRemoveBg.addEventListener('click', () => {
-            settings.bgImage = null;
-            saveSettings();
-            applySettings();
-        });
-
-        // Cerrar modal al hacer clic fuera
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-
-        // Arrancar App
-        init();
+        updateDisplay();
     </script>
 </body>
 </html>
