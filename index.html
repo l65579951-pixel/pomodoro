@@ -2,102 +2,586 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y2K Glassmorphism Pomodoro</title>
     <style>
+        /* Variables base y temas automáticos (Notion Light/Dark) */
         :root {
-            --bg-color: #fce4ec; /* Color por defecto */
             --text-color: #ffffff;
-            --glass-bg: rgba(255, 255, 255, 0.2);
-            --accent: #ff80ab;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-blur: 15px;
+            --primary-font: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            --app-bg: #e6a8b6; /* Fondo del body si no hay imagen */
         }
 
-        /* Adaptación a modo oscuro de Notion */
         @media (prefers-color-scheme: dark) {
-            :root { --glass-bg: rgba(0, 0, 0, 0.3); }
+            :root { --app-bg: #2f3437; }
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root { --app-bg: #ffffff; }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            background-color: var(--bg-color);
-            background-size: cover;
-            background-position: center;
+            font-family: var(--primary-font);
+            background-color: var(--app-bg);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            transition: background 0.3s;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
         }
 
-        .card {
+        /* 
+          CONTENEDOR EXTERIOR (EL FONDO): 
+          Ahora es más rectangular (alto > ancho) y tiene mucho más padding
+          para que el cristal interior quede más pequeño.
+        */
+        .widget-outer-container {
+            position: relative;
+            width: 340px; /* Ancho más estrecho */
+            min-height: 480px; /* Alto forzado para que sea rectangular */
+            border-radius: 35px; /* Bordes redondeados del contenedor principal */
+            overflow: hidden; 
+            padding: 60px 25px; /* MUCHO MÁS ESPACIO: Esto hace que el cristal interior sea más chico */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* La imagen de fondo pura y nítida */
+        #dynamic-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        /* 
+          PANEL INTERIOR (EL LÍMITE DE CRISTAL): 
+          Al achicarse por el padding del contenedor padre, ocupa menos espacio.
+        */
+        .glass-inner-panel {
+            position: relative;
+            z-index: 2;
+            width: 100%;
             background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            padding: 2rem;
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 25px; /* Cristal un poco menos redondeado para encajar bien */
+            padding: 2rem 1.2rem; /* Padding interno más compacto */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modos (Pomodoro, Breaks) */
+        .modes {
+            background: rgba(255, 255, 255, 0.25);
             border-radius: 30px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.3);
-            color: var(--text-color);
-            width: 300px;
+            padding: 5px;
+            display: flex;
+            gap: 4px;
+            margin-bottom: 2rem;
+            width: 100%;
         }
 
-        #timer { font-size: 4rem; font-weight: bold; margin: 20px 0; }
-        
-        button {
-            background: rgba(255,255,255,0.2);
+        .mode-btn {
+            flex: 1;
+            background: transparent;
             border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            color: white;
+            color: var(--text-color);
+            padding: 8px 4px;
+            border-radius: 25px;
+            font-weight: bold;
             cursor: pointer;
-            margin: 5px;
+            transition: all 0.3s;
+            font-size: 0.75rem; /* Letra un poco más chica para que encaje en el nuevo tamaño */
         }
 
-        .controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .mode-btn.active {
+            background: var(--text-color);
+            color: #d18d9f; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Display del reloj */
+        .timer-display {
+            font-size: 4.5rem; /* Ligeramente más chico para evitar que se desborde */
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+
+        /* Botón Start/Pause */
+        .start-btn {
+            background: var(--text-color);
+            color: #d18d9f;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: transform 0.1s, background 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .start-btn:active { transform: scale(0.95); }
+
+        /* Controles de utilidades */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.4);
+            border: none;
+            border-radius: 50%;
+            width: 40px; /* Botones apenas más pequeños para el nuevo espacio */
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: translateY(-3px);
+        }
+
+        /* Barra de progreso */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--text-color);
+            transition: width 1s linear;
+        }
+
+        .cycle-counter {
+            font-size: 0.9rem;
+            font-weight: bold;
+            opacity: 0.9;
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Modal de Configuración */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 2rem;
+            max-width: 320px;
+            border-radius: 35px;
+        }
+
+        .modal-content h2 { margin-bottom: 1rem; text-align: center; }
+
+        .setting-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+
+        .setting-group input[type="number"] {
+            width: 60px;
+            padding: 6px;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .setting-group input[type="range"] {
+            width: 120px;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            background: var(--text-color);
+            color: #d18d9f;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="card" id="app">
-    <div id="timer">25:00</div>
-    <button onclick="toggleTimer()">START</button>
-    
-    <div class="controls">
-        <input type="file" id="bgInput" style="display:none" onchange="changeBg(event)">
-        <button onclick="document.getElementById('bgInput').click()">🖼</button>
-        <input type="color" id="colorPicker" onchange="changeColor(this.value)">
+    <!-- CONTENEDOR EXTERIOR (Fondo): Aquí va la imagen nítida -->
+    <div class="widget-outer-container">
+        
+        <div id="dynamic-bg"></div>
+        
+        <!-- CONTENEDOR INTERIOR (Límite): Este es el cristal desenfocado -->
+        <main class="glass-inner-panel" id="main-panel">
+            
+            <!-- Selector de modos -->
+            <nav class="modes">
+                <button id="btn-pomodoro" class="mode-btn active">Pomodoro</button>
+                <button id="btn-short" class="mode-btn">Short Break</button>
+                <button id="btn-long" class="mode-btn">Long Break</button>
+            </nav>
+
+            <!-- Temporizador -->
+            <div class="timer-display" id="time-display">25:00</div>
+
+            <!-- Botón de acción principal -->
+            <button id="btn-main" class="start-btn">START</button>
+
+            <!-- Controles inferiores con los íconos exactos -->
+            <div class="controls">
+                <button id="btn-reset" class="icon-btn" title="Reiniciar">🔄</button>
+                <button id="btn-settings" class="icon-btn" title="Configuración">⚙</button>
+                
+                <!-- Disparadores visuales -->
+                <button id="btn-upload-trigger" class="icon-btn" title="Elegir fondo">🖼</button>
+                <button id="btn-remove-bg" class="icon-btn" title="Reiniciar imagen">🗑</button>
+                <button id="btn-color-trigger" class="icon-btn" title="Color de texto">🎨</button>
+                
+                <!-- Inputs ocultos -->
+                <input type="file" id="bg-upload" accept="image/*" style="display: none;">
+                <input type="color" id="color-picker" value="#ffffff" style="display: none;">
+            </div>
+
+            <!-- Barra de progreso -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            
+            <!-- Contador de ciclos -->
+            <div class="cycle-counter">Ciclo: <span id="cycle-count">1</span></div>
+            
+        </main>
     </div>
-</div>
 
-<script>
-    let timeLeft = 1500;
-    let timerId = null;
+    <!-- Modal de Configuración -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Configuración</h2>
+            
+            <div class="setting-group">
+                <label>Pomodoro (min):</label>
+                <input type="number" id="set-pomodoro" value="25" min="1">
+            </div>
+            <div class="setting-group">
+                <label>Descanso Corto (min):</label>
+                <input type="number" id="set-short" value="5" min="1">
+            </div>
+            <div class="setting-group">
+                <label>Descanso Largo (min):</label>
+                <input type="number" id="set-long" value="15" min="1">
+            </div>
+            
+            <div class="setting-group">
+                <label>Opacidad del cristal:</label>
+                <input type="range" id="set-opacity" min="0" max="1" step="0.05" value="0.25">
+            </div>
+            <div class="setting-group">
+                <label>Desenfoque (Blur):</label>
+                <input type="range" id="set-blur" min="0" max="30" step="1" value="15">
+            </div>
 
-    function toggleTimer() {
-        if(timerId) { clearInterval(timerId); timerId = null; }
-        else {
-            timerId = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer').innerText = formatTime(timeLeft);
-            }, 1000);
-        }
-    }
+            <button id="btn-save-settings" class="save-btn">Guardar</button>
+        </div>
+    </div>
 
-    function formatTime(s) {
-        const m = Math.floor(s/60);
-        const sec = s % 60;
-        return `${m}:${sec.toString().padStart(2, '0')}`;
-    }
+    <!-- Sonido de alarma -->
+    <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-    function changeBg(e) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            document.body.style.backgroundImage = `url(${event.target.result})`;
+    <script>
+        // --- Variables de Estado ---
+        let timer;
+        let isRunning = false;
+        let timeLeft = 25 * 60;
+        let totalTime = 25 * 60;
+        let currentMode = 'pomodoro';
+        let cycleCount = 1;
+
+        // --- Configuración por defecto ---
+        let settings = {
+            pomodoro: 25,
+            short: 5,
+            long: 15,
+            opacity: 0.25,
+            blur: 15,
+            textColor: '#ffffff',
+            bgImage: null
         };
-        reader.readAsDataURL(e.target.files[0]);
-    }
 
-    function changeColor(color) {
-        document.documentElement.style.setProperty('--text-color', color);
-    }
-</script>
+        // --- Elementos del DOM ---
+        const timeDisplay = document.getElementById('time-display');
+        const btnMain = document.getElementById('btn-main');
+        const progress = document.getElementById('progress');
+        const cycleCountEl = document.getElementById('cycle-count');
+        const alarmSound = document.getElementById('alarm-sound');
+        const root = document.documentElement;
+
+        // Modos
+        const btnPomodoro = document.getElementById('btn-pomodoro');
+        const btnShort = document.getElementById('btn-short');
+        const btnLong = document.getElementById('btn-long');
+
+        // Controles y disparadores
+        const btnReset = document.getElementById('btn-reset');
+        const btnSettings = document.getElementById('btn-settings');
+        const btnUploadTrigger = document.getElementById('btn-upload-trigger');
+        const btnColorTrigger = document.getElementById('btn-color-trigger');
+        const btnRemoveBg = document.getElementById('btn-remove-bg');
+
+        // Inputs ocultos y fondo
+        const bgUpload = document.getElementById('bg-upload');
+        const colorPicker = document.getElementById('color-picker');
+        const dynamicBg = document.getElementById('dynamic-bg');
+
+        // Modal
+        const modal = document.getElementById('settings-modal');
+        const btnSaveSettings = document.getElementById('btn-save-settings');
+        const inputPomo = document.getElementById('set-pomodoro');
+        const inputShort = document.getElementById('set-short');
+        const inputLong = document.getElementById('set-long');
+        const inputOpacity = document.getElementById('set-opacity');
+        const inputBlur = document.getElementById('set-blur');
+
+        // --- Inicialización ---
+        function init() {
+            loadSettings();
+            applySettings();
+            switchMode('pomodoro');
+        }
+
+        // --- Funciones del Temporizador ---
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            const progressPercent = ((totalTime - timeLeft) / totalTime) * 100;
+            progress.style.width = `${progressPercent}%`;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timer);
+                btnMain.textContent = 'START';
+            } else {
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        alarmSound.play();
+                        handleTimerEnd();
+                    }
+                }, 1000);
+                btnMain.textContent = 'PAUSE';
+            }
+            isRunning = !isRunning;
+        }
+
+        function handleTimerEnd() {
+            isRunning = false;
+            btnMain.textContent = 'START';
+            
+            if (currentMode === 'pomodoro') {
+                cycleCount++;
+                cycleCountEl.textContent = cycleCount;
+                if (cycleCount % 4 === 0) {
+                    switchMode('long');
+                } else {
+                    switchMode('short');
+                }
+            } else {
+                switchMode('pomodoro');
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            btnMain.textContent = 'START';
+            timeLeft = settings[currentMode] * 60;
+            totalTime = timeLeft;
+            updateDisplay();
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            btnPomodoro.classList.remove('active');
+            btnShort.classList.remove('active');
+            btnLong.classList.remove('active');
+            
+            if (mode === 'pomodoro') btnPomodoro.classList.add('active');
+            if (mode === 'short') btnShort.classList.add('active');
+            if (mode === 'long') btnLong.classList.add('active');
+
+            const activeBtn = document.querySelector('.mode-btn.active');
+            if (activeBtn) {
+                activeBtn.style.color = '#000'; 
+            }
+            
+            document.querySelectorAll('.mode-btn:not(.active)').forEach(btn => {
+                btn.style.color = 'var(--text-color)';
+            });
+
+            resetTimer();
+        }
+
+        // --- Event Listeners principales ---
+        btnMain.addEventListener('click', toggleTimer);
+        btnReset.addEventListener('click', resetTimer);
+        btnPomodoro.addEventListener('click', () => switchMode('pomodoro'));
+        btnShort.addEventListener('click', () => switchMode('short'));
+        btnLong.addEventListener('click', () => switchMode('long'));
+
+        // Conectar botones
+        btnUploadTrigger.addEventListener('click', () => bgUpload.click());
+        btnColorTrigger.addEventListener('click', () => colorPicker.click());
+
+        // --- Funciones de Configuración y LocalStorage ---
+        function loadSettings() {
+            const saved = localStorage.getItem('y2k-pomodoro-settings');
+            if (saved) {
+                settings = { ...settings, ...JSON.parse(saved) };
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('y2k-pomodoro-settings', JSON.stringify(settings));
+        }
+
+        function applySettings() {
+            root.style.setProperty('--text-color', settings.textColor);
+            root.style.setProperty('--glass-bg', `rgba(255, 255, 255, ${settings.opacity})`);
+            root.style.setProperty('--glass-blur', `${settings.blur}px`);
+            
+            inputPomo.value = settings.pomodoro;
+            inputShort.value = settings.short;
+            inputLong.value = settings.long;
+            inputOpacity.value = settings.opacity;
+            inputBlur.value = settings.blur;
+            colorPicker.value = settings.textColor;
+
+            if (settings.bgImage) {
+                dynamicBg.style.backgroundImage = `url(${settings.bgImage})`;
+            } else {
+                dynamicBg.style.backgroundImage = 'none';
+            }
+
+            resetTimer();
+        }
+
+        btnSettings.addEventListener('click', () => { 
+            modal.classList.remove('hidden'); 
+        });
+
+        btnSaveSettings.addEventListener('click', () => {
+            settings.pomodoro = parseInt(inputPomo.value) || 25;
+            settings.short = parseInt(inputShort.value) || 5;
+            settings.long = parseInt(inputLong.value) || 15;
+            settings.opacity = parseFloat(inputOpacity.value) || 0.25;
+            settings.blur = parseInt(inputBlur.value) || 15;
+            
+            saveSettings();
+            applySettings();
+            modal.classList.add('hidden');
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            settings.textColor = e.target.value;
+            saveSettings();
+            applySettings();
+        });
+
+        bgUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    settings.bgImage = event.target.result;
+                    saveSettings();
+                    applySettings();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        btnRemoveBg.addEventListener('click', () => {
+            settings.bgImage = null;
+            saveSettings();
+            applySettings();
+        });
+
+        // Cerrar modal al hacer clic fuera
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        // Arrancar App
+        init();
+    </script>
 </body>
 </html>
