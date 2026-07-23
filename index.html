@@ -408,6 +408,16 @@
     <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <script>
+        // =====================================================================
+        // 🚨 IMPORTANTE: CAMBIA ESTE NOMBRE EN CADA PÁGINA NUEVA DE NOTION
+        // Ejemplos: 'pomodoro-1', 'pomodoro-estudio', 'pomodoro-lectura'
+        // =====================================================================
+        const WIDGET_ID = 'pomodoro-1'; 
+        // =====================================================================
+        
+        // Clave dinámica para que no se mezcle con otros widgets
+        const CLAVE_SETTINGS = `y2k-pomodoro-settings_${WIDGET_ID}`;
+
         // --- Variables de Estado ---
         let timer;
         let isRunning = false;
@@ -558,19 +568,17 @@
         btnColorTrigger.addEventListener('click', () => colorPicker.click());
 
         // --- Funciones de Configuración y LocalStorage ---
-        
-        // Genera una clave única para cada página donde se use el widget
-        const storageKey = 'y2k-pomodoro-' + window.location.pathname;
-
         function loadSettings() {
-            const saved = localStorage.getItem(storageKey);
+            // Usamos la clave dinámica en lugar de la estática
+            const saved = localStorage.getItem(CLAVE_SETTINGS);
             if (saved) {
                 settings = { ...settings, ...JSON.parse(saved) };
             }
         }
 
         function saveSettings() {
-            localStorage.setItem(storageKey, JSON.stringify(settings));
+            // Guardamos usando la clave dinámica
+            localStorage.setItem(CLAVE_SETTINGS, JSON.stringify(settings));
         }
 
         function applySettings() {
