@@ -186,8 +186,6 @@
             width: 20px;
             height: 20px;
             object-fit: contain;
-            /* Filtro opcional para adaptar las imágenes al color del texto si lo deseas, 
-               por ahora mantienen su color original */
         }
 
         .icon-btn:hover {
@@ -560,15 +558,19 @@
         btnColorTrigger.addEventListener('click', () => colorPicker.click());
 
         // --- Funciones de Configuración y LocalStorage ---
+        
+        // Genera una clave única para cada página donde se use el widget
+        const storageKey = 'y2k-pomodoro-' + window.location.pathname;
+
         function loadSettings() {
-            const saved = localStorage.getItem('y2k-pomodoro-settings');
+            const saved = localStorage.getItem(storageKey);
             if (saved) {
                 settings = { ...settings, ...JSON.parse(saved) };
             }
         }
 
         function saveSettings() {
-            localStorage.setItem('y2k-pomodoro-settings', JSON.stringify(settings));
+            localStorage.setItem(storageKey, JSON.stringify(settings));
         }
 
         function applySettings() {
